@@ -1,0 +1,224 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/layui/css/layui.css" rel="stylesheet" />
+    <script src="~/Content/Scripts/jquery/jquery-1.8.2.min.js"></script>
+    <script src="~/Content/layui/layui.js"></script>
+
+    <title>ImgList</title>
+    <style type="text/css">
+        body {
+            background-color: #000000;
+        }
+
+        #imgul li {
+            float: left;
+            border: 5px solid #ffffff;
+        }
+
+        #imgul {
+            height: 110px;
+            width: 10000PX;
+            overflow: hidden;
+            position: absolute;
+        }
+
+        #Imguldiv div {
+            float: left;
+        }
+
+        #Imguldiv {
+            height: 110px;
+            width: 1000px;
+            overflow: hidden;
+            z-index: 1000;
+            margin-top: 10px;
+            margin-left: -20px;
+        }
+
+        #jingdu {
+            color: #ffffff;
+            font-size: 25px;
+        }
+
+        #uldiv {
+            height: 110px;
+            width: 1200px;
+            overflow: hidden;
+            z-index: 1000;
+            position: absolute;
+            left: 55px;
+        }
+
+        #center_html {
+            height: 440px;
+            width: 678px;
+            margin: 0px auto;
+        }
+    </style>
+
+    <script>
+
+        $(function () {
+
+            layui.use('layer', function () { //独立版的layer无需执行这一句
+                layer = layui.layer; //独立版的layer无需执行这一句
+            });
+            var ids = $("#ids").val();
+            $.ajax({
+                url: '/Home/GetPageImg',
+                data: { id: ids },
+                dataType: 'json',
+                type: 'get',
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        $("#imgul").append("<li tag='" + i + "'  onclick='onchangimg(" + i + ")'><img style='height:100PX; width:162PX' src='/" + data[i].Src + "' /></li>")
+                        $("#imgul").css("width", (data.length + 1) * 200 + "px");
+
+                    }
+                    $("#imgul").children().first().css("border", "5px solid #B4D3F7");
+                    var src = $("#imgul").children().children().first().attr("src");
+                    $("#center_html").html("<img style='width:100%;height:100%' src='" + src + "' />")
+                    indexcount = $("#imgul").children().children().length;
+                    $("#jingdu").html("1/" + indexcount);
+                    indexs = 1;
+                }
+            })
+
+
+        })
+        var indexs = 1;//边框当前的位置
+        var imgsrc = "";//图片路径
+        var indexcount = 0;//总数量
+        function onchangimg(i) {
+            //总数量减去相册显示的长度小于当前选中的图片则说明已经在最后一列了
+            //
+            if (indexcount - 7 < indexs) {
+                $("#imgul").children().css("border", "5px solid #ffffff");
+                $("#imgul").children().eq(i).css("border", "5px solid #B4D3F7");
+                imgsrc = $("#imgul").children().children().eq(i).attr("src");
+                $("#center_html").html("<img style='width:100%;height:100%' src='" + imgsrc + "' />")
+                $("#jingdu").html((i + 1) + "/" + indexcount);
+                indexs = i + 1;
+            }
+            //总数量减去相册显示的长度小于传进来的相册索引说明即将达到最后一列
+            //用总数量减去相册长度 得到第一张图片的索引 然后用第一张图片的索引减去当前图片的索引得到移动的图片数量
+            //
+            if (indexcount - 7 < i) {
+                $("#imgul").children().css("border", "5px solid #ffffff");
+                $("#imgul").children().eq(i).css("border", "5px solid #B4D3F7");
+                imgsrc = $("#imgul").children().children().eq(i).attr("src");
+                $("#center_html").html("<img style='width:100%;height:100%' src='" + imgsrc + "' />")
+                $("#imgul").animate({
+                    "left": "+=-" + 172 * ((indexcount + 1 - 7) - (indexs)) + "PX"
+                }, 200);
+                $("#jingdu").html((i + 1) + "/" + indexcount);
+                indexs = i + 1;
+                return;
+            }
+
+            //如果再次点击当前图片则啥都不干
+            if ((i + 1) == indexs) {
+                return
+            } else {
+                $("#imgul").children().css("border", "5px solid #ffffff");
+                $("#imgul").children().eq(i).css("border", "5px solid #B4D3F7");
+                imgsrc = $("#imgul").children().children().eq(i).attr("src");
+                $("#center_html").html("<img style='width:100%;height:100%' src='" + imgsrc + "' />")
+                $("#jingdu").html((i + 1) + "/" + indexcount);
+                //向前
+                if (i > indexs) {
+                    $("#imgul").animate({ "left": "+=-" + 172 * (i - indexs + 1) + "PX" }, 200)
+                    //向后
+                } else {
+                    $("#imgul").animate({ "left": "+=" + 172 * (indexs - i) + "PX" }, 200)
+                }
+                indexs = i + 1;
+
+            }
+        }
+        function rightmq() {
+
+            //下一张
+            if (indexs == parseInt(indexcount)) {
+                layer.confirm('已经是最后一张照片了，是否重新浏览？', {
+                    btn: ['确定', '取消'] //按钮
+                }, function () {
+                    $("#imgul").animate({ "left": "+=" + 172 * (indexcount - 7) + "PX" }, 200)
+                    $("#imgul").children().first().css("border", "5px solid #B4D3F7");
+                    $("#center_html").html("<img style='width:100%;height:100%' src='" + imgsrc + "' />")
+                    $("#jingdu").html("1/" + indexcount);
+                    layer.msg("已到达第一张");
+                    indexs = 1;
+
+                }, function () {
+                    return
+                });
+                return;
+            }
+            //如果当前的图片位置处于最后一列则不移动图片
+            if (indexs + 7 <= indexcount) {
+                $("#imgul").animate({ "left": "+=-172PX" }, 200)
+            }
+
+            $("#imgul").children().css("border", "5px solid #ffffff");
+            $("#imgul").children().eq(indexs).css("border", "5px solid #B4D3F7");
+            imgsrc = $("#imgul").children().children().eq(indexs).attr("src");
+            $("#center_html").html("<img style='width:100%;height:100%' src='" + imgsrc + "' />")
+            $("#jingdu").html((indexs + 1) + "/" + indexcount);
+            indexs++;
+            index--;
+        }
+        function leftmq() {
+            //上一张
+
+            if (indexs != 1) {
+                $("#imgul").animate({ "left": "+=172PX" }, 200)
+            }
+            if (indexs - 1 == 0) {
+                layer.msg("已到达第一张");
+                $("#imgul").children().css("border", "5px solid #ffffff");
+                $("#imgul").children().eq(0).css("border", "5px solid #B4D3F7");
+                return;
+            }
+
+            $("#imgul").children().css("border", "5px solid #ffffff");
+            $("#imgul").children().eq(indexs - 2).css("border", "5px solid #B4D3F7");
+
+            imgsrc = $("#imgul").children().children().eq(indexs - 2).attr("src");
+            $("#center_html").html("<img style='width:100%;height:100%' src='" + imgsrc + "' />")
+            $("#jingdu").html((indexs - 1) + "/" + indexcount);
+            indexs = indexs - 1;
+            index++;
+
+        }
+    </script>
+</head>
+<body>
+    <div id="center_html">
+
+    </div>
+    <div id="Imguldiv">
+        <div><img src="~/Content/Img/leftimg .png" style='height:110PX; width:40px;margin-left:35px;' onclick="leftmq()" /></div>
+        <div id="uldiv">
+
+            <ul id="imgul"></ul>
+
+
+        </div>
+
+
+        <div><img src="~/Content/Img/rightimg.png" style='height:110PX; width:40px;position:absolute;left:1255px;top:450px; ' onclick="rightmq()" /></div>
+    </div>
+    <span id="jingdu"></span>
+    <input type="hidden" id="ids" value="@ViewData["listid"]" />
+
+</body>
+</html>

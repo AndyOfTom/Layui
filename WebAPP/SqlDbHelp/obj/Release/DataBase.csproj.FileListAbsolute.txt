@@ -1,0 +1,6 @@
+G:\ASP\框架\Web框架\Web\WebAPP\SqlDbHelp\bin\Release\SqlDbHelp.dll
+G:\ASP\框架\Web框架\Web\WebAPP\SqlDbHelp\bin\Release\SqlDbHelp.pdb
+G:\ASP\框架\Web框架\Web\WebAPP\SqlDbHelp\obj\Release\DataBase.csprojAssemblyReference.cache
+G:\ASP\框架\Web框架\Web\WebAPP\SqlDbHelp\obj\Release\DataBase.csproj.CoreCompileInputs.cache
+G:\ASP\框架\Web框架\Web\WebAPP\SqlDbHelp\obj\Release\SqlDbHelp.dll
+G:\ASP\框架\Web框架\Web\WebAPP\SqlDbHelp\obj\Release\SqlDbHelp.pdb

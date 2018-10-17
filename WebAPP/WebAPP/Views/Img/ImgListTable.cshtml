@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+
+    <title>layui</title>
+
+    <meta name="renderer" content="webkit">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link href="~/Content/layui/css/layui.css" rel="stylesheet" />
+
+
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+
+    <style type="text/css">
+
+        .layui-table-cell {
+            height: 50px;
+        }
+
+        .layui-form .ayui-form-item {
+            float: left;
+        }
+    </style>
+
+
+</head>
+
+
+<body>
+
+    <div style="width:1150px;height:80px;margin-top:20px">
+        <form class="layui-form">
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">生成时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="date" id="date1" autocomplete="off" class="layui-input" style="width:140px;">
+                    </div>
+                </div>
+                <div class="layui-inline" style="margin-left:-155px;">
+                    <label class="layui-form-label">~</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="date" id="date2" autocomplete="off" class="layui-input" style="width:140px;">
+                    </div>
+                </div>
+                <div class="layui-inline" style="margin-left:-100px;">
+                    <label class="layui-form-label">查询条件</label>
+                    <div class="layui-input-inline" style="width:150px">
+                        <select name="quiz1">
+                            <option value="">请选择查询条件</option>
+                            <option value="Id">相册ID</option>
+                            <option value="Name">相册名称</option>
+                            <option value="TypeName">类型</option>
+                            <option value="ImgCount">照片数量</option>
+                            <option value="createtime">创建时间</option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline" style="width:150px">
+                        <select name="quiz2">
+                            <option value="">请选择判断条件</option>
+                            <option value="=">等于</option>
+                            <option value=">">大于</option>
+                            <option value="<">小于</option>
+                            <option value="like">包含有</option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline" style="width:150px">
+                        <div class="layui-input-inline">
+                            <input type="text" name="phone" autocomplete="off" class="layui-input">
+
+                        </div>
+                    </div>
+                    <button class="layui-btn" style="margin-left:40px" lay-submit="" lay-filter="demo1">查询</button>
+                </div>
+
+            </div>
+            <div class="layui-form-item" style="margin-top:-15px">
+
+                <button class="layui-btn" style="margin-left:40px" lay-submit="" lay-filter="exit">导出</button>
+                <button class="layui-btn" style="margin-left:5px" lay-submit="" lay-filter="auto">自适应宽度</button>
+                <button class="layui-btn" style="margin-left:5px" lay-submit="" lay-filter="group">分组统计</button>
+                <button class="layui-btn" style="margin-left:5px" lay-submit="" lay-filter="del">批量删除</button>
+            </div>
+        </form>
+    </div>
+
+    <table class="layui-hide" id="test" lay-filter="test" style="z-index:10;"></table>
+
+
+
+    <script type="text/html" id="barDemo">
+
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+
+    </script>
+
+    <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+    <script src="~/Content/layui/layui.all.js"></script>
+
+</body>
+<script>
+
+    layui.use(['form', 'laydate', 'table'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        form.on('select(aihao)', function (data) {
+            job = data.value;
+            form.render('select');
+            console.log(data.elem) //被执行事件的元素DOM对象，一般为button对象
+            console.log(data.form) //被执行提交的form对象，一般在存在form标签时
+        });
+        form.on('submit(del)', function (data) {
+            layer.confirm('真的删除行么', function (index) {
+              
+                var ids = "";
+              
+                layer.close(index);
+                $.ajax({
+                    data: { id: ids },
+                    type: 'post',
+                    dataType: 'text',
+                    url: '/img/DelTable',
+                    success: function (data) {
+                        alert(1)
+                        layer.msg(data)
+                        table.reload(
+                            'idTest', {
+                                url: 'http://localhost:1208/api/table/'
+                            }
+                        )
+                    }
+                });
+
+            })
+            return false;
+        });
+        table.on('checkbox(test)', function (obj) {
+            console.log(obj.checked); //当前是否选中状态
+            console.log(obj.data); //选中行的相关数据
+            console.log(obj.type); //如果触发的是全选，则为：all，如果触发的是单选，则为：one
+            var checkStatus = table.checkStatus('idTest')
+                , data = checkStatus.data;
+            layer.alert(JSON.stringify(data));
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+        laydate.render({
+            elem: '#date2'
+        });
+        var $ = layui.jquery;
+        //表格渲染
+        table.render({
+
+            elem: '#test',
+
+            width: '1150'
+
+            , url: 'http://localhost:1208/api/table/'
+
+
+
+            , title: '用户数据表'
+
+            , height: 'full-20',
+            id: 'idTest'
+
+            , cols: [[
+
+                { field: 'Id', type: 'checkbox', width: 50, fixed: 'left' }
+
+                , { field: 'Name', title: '相册名称', width: 100, edit: 'text' }
+
+                , { field: 'TypeName', title: '类型', width: 100, edit: 'text' }
+
+                , { field: 'Comment', title: '备注', width: 350, sort: true, totalRow: true }
+
+                , { field: 'ImgCount', title: '照片数量', width: 120, edit: 'text', sort: true }
+
+                , {
+
+                    field: 'fisrtImg', title: '封面', width: 120, totalRow: true, templet: function (d) {
+                        return "<img src='/" + d.fisrtImg + "' />";
+                    }
+
+                }
+
+                , { field: 'createtime', title: '创建时间', width: 150, sort: true, totalRow: true }
+
+                , {
+                    field: 'Id', title: '操作', width: 150, sort: true, totalRow: true, toolbar: '#barDemo'
+                }
+
+            ]
+
+            ]
+
+            , page: true
+
+        });
+        //行内按钮
+        table.on('tool(test)', function (obj) {
+
+            var data = obj.data;
+
+            //console.log(obj)
+
+            if (obj.event === 'del') {
+
+                layer.confirm('真的删除行么', function (index) {
+
+                    obj.del();
+
+                    layer.close(index);
+
+                });
+
+            } else if (obj.event === 'edit') {
+
+                layer.prompt({
+
+                    formType: 2
+
+                    , value: data.email
+
+                }, function (value, index) {
+
+                    obj.update({
+
+                        email: value
+
+                    });
+
+                    layer.close(index);
+
+                });
+
+            }
+
+        });
+        //头工具栏事件
+
+        /* table.on('toolbar(test)', function (obj) {
+
+             var checkStatus = table.checkStatus(obj.config.id);
+             var tabledata = obj.data;
+             switch (obj.event) {
+
+                 case 'getCheckData':
+
+
+                     layer.confirm('真的删除行么', function (index) {
+                         var data = checkStatus.data;
+                         var ids = "";
+                         $.each(data, function (i, e) {
+                             ids += e.Id + ',';
+                             alert(ids)
+                         })
+                         layer.close(index);
+                         $.ajax({
+                             data: { id: ids },
+                             type: 'post',
+                             dataType: 'text',
+                             url: '/img/DelTable',
+                             success: function (data) {
+                                 alert(1)
+                                 layer.msg(data)
+                                 table.reload(
+                                     'idTest', {
+                                         url: 'http://localhost:1208/api/table/'
+                                     }
+                                 )
+                             }
+                         });
+
+
+                     });
+                     break;
+
+                 case 'getCheckLength':
+
+                     var data = checkStatus.data;
+
+                     layer.msg('选中了：' + data.length + ' 个');
+
+                     break;
+
+                 case 'isAll':
+
+                     layer.msg(checkStatus.isAll ? '全选' : '未全选');
+
+                     break;
+
+             };
+
+         });*/
+
+        //监听行工具事件
+
+
+    });
+
+</script>
+</html>
